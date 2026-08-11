@@ -2,6 +2,10 @@
 
 An interactive research project investigating whether Apple news sentiment adds useful information to a simple stock-momentum signal.
 
+[**View the Live Research App →**](https://aapl-spy.streamlit.app/)
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aapl-spy.streamlit.app/)
+
 The project compares Apple (`AAPL`) with the S&P 500 ETF (`SPY`). It begins with a headline-tone result, then challenges that result through chronological, walk-forward, non-overlapping, ablation, and failure-case analyses. The final conclusion is cautious: headline tone showed some period-dependent ranking value, but no tested model was consistently reliable.
 
 > **Current interface status:** the Streamlit app is designed and tested for desktop use. Mobile optimization is planned after the desktop content and design are finalized.

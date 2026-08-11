@@ -7,7 +7,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
+APP_DATA_DIR = PROJECT_ROOT / "data" / "app"
 
 st.set_page_config(
     page_title="Do Headlines Improve Momentum Signals?",
@@ -87,13 +87,12 @@ st.markdown(
 
 @st.cache_data
 def load_project_summary() -> dict:
-    combined = pd.read_csv(PROCESSED_DIR / "aapl_momentum_sentiment.csv")
-    headlines = pd.read_csv(PROCESSED_DIR / "apple_headlines_finbert.csv")
-    review = pd.read_csv(PROCESSED_DIR / "apple_sentiment_manual_review.csv")
+    combined = pd.read_csv(APP_DATA_DIR / "aapl_momentum_sentiment.csv")
+    headlines = pd.read_csv(APP_DATA_DIR / "headlines.csv")
     return {
         "observations": int((pd.to_datetime(combined["date"]) <= "2024-11-22").sum()),
         "headlines": len(headlines),
-        "reviewed": len(review),
+        "reviewed": 30,
         "start": pd.to_datetime(combined["date"]).min().strftime("%b %Y"),
         "end": "Nov 2024",
     }
@@ -102,27 +101,26 @@ def load_project_summary() -> dict:
 @st.cache_data
 def load_explorer_data():
     predictions = pd.read_csv(
-        PROCESSED_DIR / "explorer_predictions.csv", parse_dates=["date"], index_col="date"
+        APP_DATA_DIR / "explorer_predictions.csv", parse_dates=["date"], index_col="date"
     ).sort_index()
     headlines = pd.read_csv(
-        PROCESSED_DIR / "apple_headlines_finbert.csv",
+        APP_DATA_DIR / "headlines.csv",
         parse_dates=["published_at", "trading_date"],
     )
     prices = pd.read_csv(
-        PROJECT_ROOT / "data" / "raw" / "aapl_spy_2023-01-01_to_2025-01-01.csv",
-        header=[0, 1],
-        index_col=0,
+        APP_DATA_DIR / "prices.csv",
+        index_col="date",
         parse_dates=True,
-    )["Adj Close"][["AAPL", "SPY"]]
+    )[["AAPL", "SPY"]]
     return predictions, headlines, prices
 
 
 @st.cache_data
 def load_model_page_data():
-    explorer = pd.read_csv(PROCESSED_DIR / "explorer_predictions.csv", parse_dates=["date"])
-    comparison = pd.read_csv(PROCESSED_DIR / "model_comparison_predictions.csv", parse_dates=["date"])
-    walk_forward = pd.read_csv(PROCESSED_DIR / "walk_forward_results.csv")
-    non_overlapping = pd.read_csv(PROCESSED_DIR / "non_overlapping_results.csv")
+    explorer = pd.read_csv(APP_DATA_DIR / "explorer_predictions.csv", parse_dates=["date"])
+    comparison = pd.read_csv(APP_DATA_DIR / "model_comparison_predictions.csv", parse_dates=["date"])
+    walk_forward = pd.read_csv(APP_DATA_DIR / "walk_forward_results.csv")
+    non_overlapping = pd.read_csv(APP_DATA_DIR / "non_overlapping_results.csv")
 
     actual = explorer["outperformed"].astype(int)
     fixed_specs = {
@@ -159,14 +157,13 @@ def load_model_page_data():
 
 @st.cache_data
 def load_limitations_data():
-    failures = pd.read_csv(PROCESSED_DIR / "failure_cases.csv", parse_dates=["date"])
-    predictions = pd.read_csv(PROCESSED_DIR / "explorer_predictions.csv", parse_dates=["date"])
-    review = pd.read_csv(PROCESSED_DIR / "apple_sentiment_manual_review.csv")
+    failures = pd.read_csv(APP_DATA_DIR / "failure_cases.csv", parse_dates=["date"])
+    predictions = pd.read_csv(APP_DATA_DIR / "explorer_predictions.csv", parse_dates=["date"])
     predictions["relative_return"] = (
         predictions["aapl_future_return_5d"] - predictions["spy_future_return_5d"]
     )
     predictions["tone_confidence"] = (predictions["tone_probability"] - 0.5).abs()
-    return failures, predictions, review
+    return failures, predictions
 
 
 summary = load_project_summary()
@@ -865,7 +862,7 @@ elif page == "Model Comparison":
         )
 
 elif page == "Failures & Limitations":
-    failures, predictions, review = load_limitations_data()
+    failures, predictions = load_limitations_data()
 
     st.markdown('<div class="eyebrow">Where the story gets more credible</div>', unsafe_allow_html=True)
     st.title("Failures & Limitations")

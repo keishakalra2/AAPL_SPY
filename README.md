@@ -105,19 +105,23 @@ app.py             Streamlit research application
 notebooks/         Numbered research pipeline, from prices through failure analysis
 data/raw/          Local source datasets (not committed)
 data/processed/    Generated features, predictions, and results (not committed)
+data/app/          Compact, deployment-safe files used by the public app
 src/               Reusable Python package scaffold
 archive/           Earlier exploratory datasets
-requirements.txt   Python dependencies
+requirements.txt   Lightweight app dependencies
+requirements-research.txt  Additional notebook and model dependencies
 ```
 
-Raw and generated CSV files are excluded from version control because of dataset size and redistribution considerations. To reproduce the complete app, place the required source files in `data/raw/` and run the numbered notebooks in order. The notebooks generate the files consumed by `app.py` in `data/processed/`.
+Raw and full generated CSV files are excluded from version control because of dataset size and redistribution considerations. The committed `data/app/` exports include only the compact fields needed to display the research app; full article bodies are not included.
+
+To reproduce the analysis, place the required source files in `data/raw/`, install the research dependencies, and run the numbered notebooks in order. The notebooks generate the complete research files in `data/processed/`.
 
 ## Local setup
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements-research.txt
 jupyter lab
 ```
 
